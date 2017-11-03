@@ -9,7 +9,11 @@
 		width: 10%;
 	}
 
+	.edit-button {
+		float: right;
+	}
 }
 
-
+.edit-button {
+	float: right;
 }

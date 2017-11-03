@@ -1,17 +1,94 @@
 <?php
 
-//Routes used by the admin portal to change or view the database.
+    //Routes used by the admin portal to change or view the database.
 
-/**
-   * @api {get} /
-   * @apiName Admin Site
-   *
- */
-$app->get('/admin', function() use ($app) {
-  $app->redirect("/admin/loginPage.php");
-});
+    /**
+       * @api {get} /
+       * @apiName Admin Site
+       *
+     */
+    $app->get('/administrator', function() use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+        $app->render('admin/adminBase.php', array(
+            'appTemplate' => 'main.php'
+        ));
+    });
 
-$app->response->headers->set('Content-Type', 'application/json');
+    /**
+     * GET response that provides a listing of all
+     * categories available in the
+     * database and the corresponding ID.
+     *
+     * @apiSuccess {String} name Name of the category.
+     * @apiSuccess {Integer} id ID of the category.
+     */
+    $app->get('/category/all', function() use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+
+        $categories = Query::getAllCategories();
+        $app->render('admin/adminBase.php', array(
+            'appTemplate' => 'categories.php',
+            'categories' => $categories->fetch_all(MYSQLI_ASSOC)
+        ));
+    });
+
+
+    /**
+     * @api {GET} /category/:id Fetches a specific category.
+     *
+     * @apiParam {integer} id Category ID.
+     */
+    $app->get('/category/:id', function($id) use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+
+        $category = Query::getCategoryById($id);
+        $app->render('admin/adminBase.php', array(
+            'appTemplate' => 'category.php',
+            'category' => $category->fetch_all(MYSQLI_ASSOC)
+        ));
+    });
+
+    /**
+     * @api {delete} /category/:id Remove a specific category (associated businesses default to NULL).
+     *
+     * @apiParam {integer} id Category ID.
+     */
+    $app->delete('/category/:id', function($id){
+        $mysqli = connectReuseDB();
+
+        $delID = $mysqli->real_escape_string($id);
+        $mysqli->query("DELETE FROM Reuse_Categories 
+                        WHERE Reuse_Categories.id ='$delID'");
+        $mysqli->close();
+
+        /* Update Mobile Database */
+        reuse_generateXML();
+    });
+
+    /**
+     * @api {put} /category/:id Update a specific category (associated businesses default to NULL).
+     *
+     * @apiParam {integer} id Category ID.
+     */
+    $app->put('/category/:id', function($id) use ($app) {
+        $mysqli = connectReuseDB();
+        
+        $name = $app->request->put('name');
+        $app->log->debug($name);
+
+        $update_id = $mysqli->real_escape_string($id);
+        $mysqli->query("UPDATE Reuse_Categories
+                        SET name = '$name'
+                        WHERE Reuse_Categories.id ='$update_id'");
+        $mysqli->close();
+
+        /* Update Mobile Database */
+        // reuse_generateXML();
+
+        $app->redirect('/category/all');
+    });
+
+
 // API group
     $app->group('/RUapi', function () use ($app) {
 
@@ -28,24 +105,7 @@ $app->response->headers->set('Content-Type', 'application/json');
      *
      * @apiSuccess {String} The name of the category corresponding to that ID
      */
-    $app->get('/category/:id', function($id){
-        $mysqli = connectReuseDB();
 
-        $id = (int)$mysqli->real_escape_string($id);
-        $result = $mysqli->query("SELECT name, id 
-                                  FROM Reuse_Categories 
-                                  WHERE Reuse_Categories.id = '.$id.'");
-
-        $returnArray = array();
-        while($row = $result->fetch_object()){
-          $returnArray[] = $row;
-        }
-
-        echo json_encode($returnArray);
-
-        $result->close();
-        $mysqli->close();
-    });
 
 
     /**
@@ -102,35 +162,6 @@ $app->response->headers->set('Content-Type', 'application/json');
         $mysqli->close();
     });
 
-
-    /**
-     * GET response that provides a listing of all
-     * categories available in the
-     * database and the corresponding ID.
-     *
-     * @api {get} /category Request User information
-     * @apiName ReUseApp
-     * @apiGroup RUapi
-     *
-     * @apiSuccess {String} name Name of the category.
-     * @apiSuccess {Integer} id ID of the category.
-     */
-
-    $app->get('/category', function() {
-        $mysqli = connectReuseDB();
-
-        $result = $mysqli->query("SELECT name, id FROM Reuse_Categories");
-
-        $returnArray = array();
-        while($row = $result->fetch_object()){
-          $returnArray[] = $row;
-        }
-
-        echo json_encode($returnArray);
-
-        $result->close();
-        $mysqli->close();
-    });
 
     /**
      * @api {get} /items/:id Request item name and category id from item id.
@@ -408,24 +439,7 @@ $app->response->headers->set('Content-Type', 'application/json');
          reuse_generateXML();
     });
 
-    /**
-     * @api {delete} /category/:id Remove a specific category (associated businesses default to NULL).
-     * @apiName ReUseApp
-     * @apiGroup RUapi
-     *
-     * @apiParam {integer} id Category ID.
-     */
-    $app->delete('/category/:id', function($id){
-        $mysqli = connectReuseDB();
 
-        $delID = $mysqli->real_escape_string($id);
-        $mysqli->query("DELETE FROM Reuse_Categories 
-                        WHERE Reuse_Categories.id ='$delID'");
-        $mysqli->close();
-
-        /* Update Mobile Database */
-        reuse_generateXML();
-    });
 
     /**
      * @api {delete} /updateBusiness/:one/:id Remove a specific item from a business's catalog.

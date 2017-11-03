@@ -17,7 +17,7 @@ class Query {
 
     public static function getRepairExclusiveLocations() {
 
-        $db	 = connectReuseDB();
+        $db  = connectReuseDB();
         return $db->query(
             "SELECT DISTINCT loc.name, loc.id, loc.address_line_1, loc.address_line_2, state.abbreviation, loc.phone, 
                              loc.website, loc.city, loc.zip_code, loc.latitude, loc.longitude 
@@ -75,6 +75,23 @@ class Query {
              JOIN Reuse_Categories c ON i.category_id = c.id
              WHERE l.Type = 0
              ORDER BY c.name ASC"
+        );
+    }
+
+    public static function getAllCategories() {
+        $db = connectReuseDB();
+        return $db->query(
+            "SELECT name, id FROM Reuse_Categories"
+        );
+    }
+
+    public static function getCategoryById($id) {
+        $db = connectReuseDB();
+        $id = $db->real_escape_string($id);
+        return $db->query(
+            "SELECT name, id
+             FROM Reuse_Categories
+             WHERE Reuse_Categories.id = ".$id.""
         );
     }
 }

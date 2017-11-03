@@ -43,6 +43,7 @@ function searchCategoryById(id){
   url: webURL + "/RUapi/category/" + id,
   dataType: 'json',
   success: function(data){
+    console.log(data)
     $('#EditData').empty();
     $('#EditData1').empty();
     $('#EditData2').empty();
