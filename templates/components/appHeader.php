@@ -87,7 +87,7 @@
                         <a href="/contact" class="header-link">Contact</a>
                     </li>
                     <li role="presentation" class="header-button">
-                        <a href="/admin/loginPage.php" class="header-link">Admin</a>
+                        <a href="/administrator" class="header-link">Admin</a>
                     </li>
                     <li role="presentation" class="header-button">
                         <a href="http://sustainablecorvallis.org/"

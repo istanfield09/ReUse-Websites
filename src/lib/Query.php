@@ -99,6 +99,57 @@ class Query {
         );
     }
 
+    public static function getAllBusinesses() {
+        $db = connectReuseDB();
+        return $db->query(
+            "SELECT * FROM Reuse_Locations"
+        );
+    }
+
+    public static function getBusinessById($id) {
+        $db = connectReuseDB();
+        $id = $db->real_escape_string($id);
+        return $db->query(
+            "SELECT * FROM Reuse_Locations 
+             WHERE Reuse_Locations.id ='$id'"
+        );
+    }
+
+    public static function updateBusiness($id, $data, $app) {
+        $db = connectReuseDB();
+
+        $name = Util::fetch_val('name', $data, null);
+        $address_line_1 = Util::fetch_val('address_line_1', $data, null);
+        $address_line_2 = Util::fetch_val('address_line_2', $data, null);
+        $city = Util::fetch_val('city', $data, null);
+        $state_id = (int)Util::fetch_val('state_id', $data, null);
+        $zip_code = (int)Util::fetch_val('zip_code', $data, null);
+        $phone = Util::fetch_val('phone', $data, null);
+        $website = Util::fetch_val('website', $data, null);
+        $recycle = (int)Util::fetch_val('Recycle', $data, 0);
+
+        // $location_data = bingGeocode($address_line_1, $city, $state_id, $zip_code);
+        // $latitude = Util::fetch_val('lat', $location_data, null);
+        $latitude = null;
+        $longitude = null;
+        // $longitude = Util::fetch_val('long', $location_data, null);
+
+        return $db->query(
+            "UPDATE Reuse_Locations 
+             SET name='$name', 
+                 address_line_1='$address_line_1',
+                 address_line_2='$address_line_2',
+                 city='$city',
+                 state_id=$state_id,
+                 zip_code=$zip_code,
+                 phone='$phone',
+                 website='$website',
+                 recycle=$recycle
+             WHERE Reuse_Locations.id=$id"
+        );
+
+    }
+
     public static function getRepairExclusiveCategories() {
         $db = connectReuseDB();
         return $db->query(
@@ -219,6 +270,34 @@ class Query {
                (loc.name LIKE '%$searchTerm%') OR
                (cat.name LIKE '%$searchTerm%')
              ORDER BY loc.name ASC;"
+        );
+    }
+
+    public static function getAllCategories() {
+        $db = connectReuseDB();
+        return $db->query(
+            "SELECT name, id FROM Reuse_Categories"
+        );
+    }
+
+    public static function getCategoryById($id) {
+        $db = connectReuseDB();
+        $id = $db->real_escape_string($id);
+        return $db->query(
+            "SELECT name, id
+             FROM Reuse_Categories
+             WHERE Reuse_Categories.id = ".$id.""
+        );
+    }
+
+    public static function updateCategoryName($id, $name) {
+        $db = connectReuseDB();
+        $id = $db->real_escape_string($id);
+        $name = $db->real_escape_string($name);
+        return $db->query(
+            "UPDATE Reuse_Categories
+             SET name = '$name'
+             WHERE Reuse_Categories.id = '$id'"
         );
     }
 }

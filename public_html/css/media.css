@@ -9,7 +9,18 @@
 		width: 10%;
 	}
 
+	.edit-button {
+		float: right;
+	}
 }
 
+.category-buttons {
+	float: right;
+	display: -webkit-inline-box;
 
 }
+
+.category-buttons button {
+	margin-right: 10px;
+}
+
