@@ -5,7 +5,7 @@
       
        <div class="navbar-header">
         <div class="collapse navbar-collapse">
-           <img src="../img/CSCRectangular.png" class="img-thumbnail">
+           <img src="/img/CSCRectangular.png" class="img-thumbnail">
         </div>
         </div> <!-- End brand section -->
       
@@ -39,7 +39,7 @@
               <ul class="dropdown-menu">
                 <li><a href="searchBusiness.php">Edit or Delete Business</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="/category/all">Edit or Delete Category</a></li>
+                <li><a href="searchCategory.php">Edit or Delete Category</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="searchItem.php">Edit or Delete Item</a></li>
               </ul>

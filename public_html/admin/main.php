@@ -27,12 +27,6 @@
   <link href='https://fonts.googleapis.com/css?family=Rubik:700' rel='stylesheet' type='text/css'>
   <script src="../js/jquery-1.11.1.min.js"></script>
   <script src="../js/mainFunct.js"></script>
-  <script>
-  //ONLOAD -- GET requests and checking of session with jQuery
-  $(document).ready(function(){
-    checkSession();
-  });
-  </script>
   </head>
   <body>
 

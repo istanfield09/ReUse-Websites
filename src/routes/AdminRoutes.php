@@ -1,27 +1,64 @@
 <?php
 
-// Helper used to safely fetch POST values. This should be placed
-// somewhere better eventually. <~ TODO
-function fetch_val($key, $array, $default = 'undefined') {
-    if (array_key_exists($key, $array)) {
-        return $array[$key];
-    } else {
-        return $default;
+    // Helper used to safely fetch POST values. This should be placed
+    // somewhere better eventually. <~ TODO
+    function fetch_val($key, $array, $default = 'undefined') {
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        } else {
+            return $default;
+        }
     }
-}
 
-//Routes used by the admin portal to change or view the database.
+    //Routes used by the admin portal to change or view the database.
 
-/**
-   * @api {get} /
-   * @apiName Admin Site
-   *
- */
-$app->get('/admin', function() use ($app) {
-  $app->redirect("/admin/loginPage.php");
-});
+    /**
+       * @api {get} /
+       * @apiName Admin Site
+       *
+     */
+    $app->get('/admin', function() use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+        $app->redirect("/admin/loginPage.php");
+    });
 
-$app->response->headers->set('Content-Type', 'application/json');
+    /**
+     * GET response that provides a listing of all
+     * categories available in the
+     * database and the corresponding ID.
+     *
+     * @api {get} /category Request User information
+     * @apiName ReUseApp
+     * @apiGroup RUapi
+     *
+     * @apiSuccess {String} name Name of the category.
+     * @apiSuccess {Integer} id ID of the category.
+     */
+
+    $app->get('/category/all', function() use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+
+        $categories = Query::getAllCategories();
+        $app->render('admin/categories.php', array(
+            'categories' => $categories->fetch_all(MYSQLI_ASSOC),
+            'isAdminTemplate' => true
+        ));
+    });
+
+    $app->get('/category/:id', function($id) use ($app) {
+        $app->response->headers->set('Content-Type', 'text/html');
+
+        $category = Query::getCategoryById($id);
+        //$app->log->debug($category->fetch_all(MYSQLI_ASSOC));
+        $app->render('category.php', array(
+            'category' => $category->fetch_all(MYSQLI_ASSOC),
+            'isAdminTemplate' => true
+        ));
+    });
+
+
+
+
 // API group
     $app->group('/RUapi', function () use ($app) {
 
@@ -38,24 +75,7 @@ $app->response->headers->set('Content-Type', 'application/json');
      *
      * @apiSuccess {String} The name of the category corresponding to that ID
      */
-    $app->get('/category/:id', function($id){
-        $mysqli = connectReuseDB();
 
-        $id = (int)$mysqli->real_escape_string($id);
-        $result = $mysqli->query("SELECT name, id 
-                                  FROM Reuse_Categories 
-                                  WHERE Reuse_Categories.id = '.$id.'");
-
-        $returnArray = array();
-        while($row = $result->fetch_object()){
-          $returnArray[] = $row;
-        }
-
-        echo json_encode($returnArray);
-
-        $result->close();
-        $mysqli->close();
-    });
 
 
     /**
@@ -112,35 +132,6 @@ $app->response->headers->set('Content-Type', 'application/json');
         $mysqli->close();
     });
 
-
-    /**
-     * GET response that provides a listing of all
-     * categories available in the
-     * database and the corresponding ID.
-     *
-     * @api {get} /category Request User information
-     * @apiName ReUseApp
-     * @apiGroup RUapi
-     *
-     * @apiSuccess {String} name Name of the category.
-     * @apiSuccess {Integer} id ID of the category.
-     */
-
-    $app->get('/category', function() {
-        $mysqli = connectReuseDB();
-
-        $result = $mysqli->query("SELECT name, id FROM Reuse_Categories");
-
-        $returnArray = array();
-        while($row = $result->fetch_object()){
-          $returnArray[] = $row;
-        }
-
-        echo json_encode($returnArray);
-
-        $result->close();
-        $mysqli->close();
-    });
 
     /**
      * @api {get} /items/:id Request item name and category id from item id.
