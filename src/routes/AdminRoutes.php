@@ -952,7 +952,7 @@ $app->response->headers->set('Content-Type', 'application/json');
      * @apiParam {Integer} cat Category ID item will belong to
      * @apiParam {string} name Item name to set
      */
-    $app->post('/addBusinessDoc', function() use ($app) {
+    $app->post('/business/document', function() use ($app) {
         $mysqli = connectReuseDB();
         $request_body = json_decode($app->request->getBody());
 
@@ -963,19 +963,12 @@ $app->response->headers->set('Content-Type', 'application/json');
         $doc_name = $mysqli->real_escape_string($doc_name);
         $doc_url = $mysqli->real_escape_string($doc_url);
     
-        $trigger = 1;
         /* Check to  make sure it's not a duplicate */
-        $result = $mysqli->query('SELECT name, URI FROM Reuse_Documents');
-        while($row = $result->fetch_object()){
-            if($row->name == $doc_name){
-                $mysqli->close();
-                echo json_encode("Item already exists, please select a different name.");
-                $trigger = 0;
-             }
-        }
+        $result = $mysqli->query("SELECT name FROM Reuse_Documents 
+                                  WHERE location_id = '$business_id' 
+                                  AND name = '$doc_name'");
 
-        if($trigger)
-        {
+        if($result->fetch_object() == NULL) {
             /* prepare the statement*/
             if (!($stmt = $mysqli->prepare("INSERT INTO Reuse_Documents (name, URI, location_id) VALUES (?, ?, ?)"))){
                 echo "Prepare failed : (".$mysqli->connect_errno.")".$mysqli->connect_error;
@@ -994,8 +987,11 @@ $app->response->headers->set('Content-Type', 'application/json');
             /* updated */
             echo  json_encode("Item added succesfully");
             $stmt->close();
-            $mysqli->close();
+        } else {
+            echo json_encode("Item already exists, please select a different name.");
         }
+
+        $mysqli->close();
     });
 });
 ?>
